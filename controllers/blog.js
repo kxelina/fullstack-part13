@@ -4,6 +4,7 @@ const { Blog } = require('../models')
 const { User } = require('../models')
 const jwt = require('jsonwebtoken')
 const { SECRET } = require('../util/config')
+const { Op } = require('sequelize')
 
 
 const tokenExtractor = (req, res, next) => {
@@ -30,21 +31,27 @@ router.post('/', tokenExtractor, async (req, res) => {
 })
 
 router.get('/', async (req, res) => {
+    const where = {}
+
+    if (req.query.search) {
+        where[Op.or] = [
+             {title: {[Op.substring]: req.query.search}},
+             {author: {[Op.substring]: req.query.search}}
+        ]
+    }
+
     const blogs = await Blog.findAll({
         include: {
             model: User,
             attributes: ['username']
-        }
+        },
+        where,
+        order: [['likes', 'DESC']]
     })
     console.log(JSON.stringify(blogs))
     res.json(blogs)
 })
 
-// router.post('/', async (req, res) => {
-//     const user = await User.findOne()
-//     const blog = await Blog.create({ ...req.body, userId: user.id })
-//     res.json(blog)
-// })
 
 router.get('/:id', async (req, res) => {
     const blog = await Blog.findByPk(req.params.id)
