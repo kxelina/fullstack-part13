@@ -15,17 +15,24 @@ User.init({
     unique: true,
     allowNull: false,
     validate: {
-        isEmail: true,
-        msg: 'Validation isEmail on username failed'
-    }
-  },
+        isEmail: {
+          args: true,
+          msg: 'Validation isEmail on username failed'
+        }
+  }},
   name: {
     type: DataTypes.STRING,
     allowNull: false
   },
+  disabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  }
 }, {
   sequelize,
-  modelName: 'user'
+  modelName: 'user',
+  underscored: true,
+  timestamps: true
 })
 
 module.exports = User
